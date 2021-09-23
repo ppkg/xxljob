@@ -8,15 +8,15 @@ import (
 	xxl "github.com/ppkg/xxl-job-executor-go"
 )
 
-type Task struct{}
+type task struct{}
 
 var (
 	exec xxl.Executor
-	jobs map[string]func(cxt context.Context, param *xxl.RunReq) (msg string)
+	jobs = make(map[string]func(cxt context.Context, param *xxl.RunReq) (msg string))
 	lock sync.RWMutex
 )
 
-func InitTask(key, addr, port string) *Task {
+func Init(key, addr, port string) *task {
 	glog.Info("xxljob Init", key, addr, port)
 	exec = xxl.NewExecutor(
 		xxl.ServerAddr(addr),
@@ -29,7 +29,7 @@ func InitTask(key, addr, port string) *Task {
 	for k, v := range jobs {
 		exec.RegTask(k, v)
 	}
-	return &Task{}
+	return &task{}
 }
 
 func AddTask(jobHandler string, jobFunc func(cxt context.Context, param *xxl.RunReq) (msg string)) {
@@ -42,7 +42,7 @@ func AddTask(jobHandler string, jobFunc func(cxt context.Context, param *xxl.Run
 	}
 }
 
-func (t *Task) TaskRun() {
+func (t *task) Run() {
 	if err := exec.Run(); err != nil {
 		glog.Info("xxljob exec run error ", err)
 	}
