@@ -16,6 +16,9 @@ var (
 	lock sync.RWMutex
 )
 
+// appid：应用ID
+// serverAddr：xxljob admin 接口地址，如 http://xx.xx.xx.xx:8080/xxl-job-admin
+// executorPort：执行器服务端口
 func Init(appid, serverAddr, executorPort string) *task {
 	glog.Info("xxljob Init", appid, serverAddr, executorPort)
 	exec = xxl.NewExecutor(
@@ -32,6 +35,7 @@ func Init(appid, serverAddr, executorPort string) *task {
 	return &task{}
 }
 
+// jobHandler：同一appid下不能重复
 func AddTask(jobHandler string, jobFunc func(cxt context.Context, param *xxl.RunReq) (msg string)) {
 	lock.Lock()
 	defer lock.Unlock()
