@@ -16,13 +16,13 @@ var (
 	lock sync.RWMutex
 )
 
-func Init(key, addr, port string) *task {
-	glog.Info("xxljob Init", key, addr, port)
+func Init(appid, serverAddr, executorPort string) *task {
+	glog.Info("xxljob Init", appid, serverAddr, executorPort)
 	exec = xxl.NewExecutor(
-		xxl.ServerAddr(addr),
+		xxl.ServerAddr(serverAddr),
 		xxl.AccessToken(""),
-		xxl.ExecutorPort(port),
-		xxl.RegistryKey(key),
+		xxl.ExecutorPort(executorPort),
+		xxl.RegistryKey(appid),
 		xxl.SetLogger(&logger{}),
 	)
 	exec.Init()
