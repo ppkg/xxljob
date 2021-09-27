@@ -33,7 +33,9 @@ func Init(appid, serverAddr, executorPort string) *task {
 		xxl.SetLogger(&logger{}),
 	)
 	exec.Init()
+	glog.Info(appid, "jobs", len(jobs))
 	for k, v := range jobs {
+		glog.Info("RegTask：", k)
 		exec.RegTask(k, v)
 	}
 	return &task{}
@@ -41,21 +43,22 @@ func Init(appid, serverAddr, executorPort string) *task {
 
 // 添加标准的xxljob任务
 // jobHandler：同一appid下不能重复
-func AddTask(jobHandler string, jobFunc func(cxt context.Context, param *xxl.RunReq) (msg string)) {
+func AddTask(jobName string, jobFunc func(cxt context.Context, param *xxl.RunReq) (msg string)) {
 	lock.Lock()
 	defer lock.Unlock()
-	if _, has := jobs[jobHandler]; has {
-		glog.Error(jobHandler, "duplicate definition")
+	if _, has := jobs[jobName]; has {
+		glog.Error(jobName, "duplicate definition")
 	} else {
-		jobs[jobHandler] = jobFunc
+		jobs[jobName] = jobFunc
+		glog.Info("xxljob.AddTask", jobName)
 	}
 }
 
 // 添加根据最大更新时间取数据的任务
 // 一般是需要根据redis中存储的更新时间取数据
 // 取到数据后，再用最大的更新时间覆盖redis的原来的更新时间
-func AddTaskMaxUpdateDate(jobHandler string, updateDateKey string, jobFunc func(cxt context.Context, param *xxl.RunReq) (msg string, updateDate time.Time)) {
-	AddTask(jobHandler, func(cxt context.Context, param *xxl.RunReq) (msg string) {
+func AddTaskMaxUpdateDate(jobName string, updateDateKey string, jobFunc func(cxt context.Context, param *xxl.RunReq) (msg string, updateDate time.Time)) {
+	AddTask(jobName, func(cxt context.Context, param *xxl.RunReq) (msg string) {
 		var redisUpdateDate string
 		var updateDate time.Time
 		msg, updateDate = jobFunc(cxt, param)
